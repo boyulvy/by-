@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>安全访问入口 - 专业域名工具服务站</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <link rel="stylesheet" href="/assets/mobile-enhanced.css?v=2026020301">
+  <script src="https://kit.fontawesome.com/6b1e9d9c7c.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <!-- 顶栏：logo + 标题，全在一行 -->
+  <div class="top-bar">
+    <div class="top-left">
+      <img src="https://8yhot.com/files/logos/logo1.png" class="header-logo" alt="LOGO">
+      <span class="header-title">专业域名工具服务站</span>
+    </div>
+  </div>
+
+  <!-- 活动轮播区 -->
+  <div class="banner-carousel">
+    <div class="carousel-container">
+      <div class="carousel-slides" id="carouselSlides">
+        <div class="carousel-slide active">
+          <img src="https://byphoto01.com/img/pqKO/J0cMaXvvg.png" alt="年卡活动">
+        </div>
+        <div class="carousel-slide">
+          <img src="https://byphoto01.com/img/pqKO/J0cpPQyEf.png" alt="会员日活动">
+        </div>
+        <div class="carousel-slide">
+          <img src="https://byphoto01.com/img/pqKO/J0xC1HULq.png" alt="老用户回归">
+        </div>
+        <div class="carousel-slide">
+          <img src="https://byphoto01.com/img/pqKO/J0xCJOjmV.png" alt="笔笔充值送">
+        </div>
+      </div>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+  </div>
+
+  <!-- 功能入口栏，居中显示、按钮有功能名称，包含详细功能说明 -->
+  <div class="entry-bar">
+    <!-- 立即注册（醒目显示） -->
+    <button class="entry-btn register-highlight" onclick="window.handleRegister()" title="🎉 立即注册 · 新用户专享&#10;30秒极速开户">
+      <i class="fas fa-user-plus"></i> 立即注册
+    </button>
+    <!-- 快速登录服务（醒目显示） -->
+    <button class="entry-btn quick-login-highlight" onclick="window.handleQuickLogin()" title="⚡ 一键登录&#10;自动选择最佳线路">
+      <i class="fas fa-bolt"></i> 一键登录
+    </button>
+    <!-- 移动应用下载 -->
+    <button class="entry-btn" onclick="window.showAppDownloadModal()" title="📱 APP下载&#10;Android / iOS 官方应用">
+      <i class="fas fa-mobile-alt"></i> APP下载
+    </button>
+    <!-- 客户支持服务 -->
+    <button class="entry-btn" onclick="window.showCustomerServiceModal()" title="🎧 客服咨询&#10;9:00-3:00在线服务">
+      <i class="fas fa-comments"></i> 客服咨询
+    </button>
+  </div>
+  <!-- 域名排名表格，居中显示 -->
+  <main class="main-content">
+    <section class="fc-section domain-ranking">
+      <div class="section-header">
+        <h2>更多域名推荐</h2>
+        <button class="refresh-btn" onclick="refreshDomainRanking()" title="刷新域名排名数据">
+          <i class="fas fa-sync-alt"></i> 刷新
+        </button>
+      </div>
+      <div class="table-wrap">
+        <table class="main-table domain-table">
+          <thead>
+            <tr>
+              <th>NO.</th>
+              <th>响应</th>
+              <th>状态</th>
+              <th>线路</th>
+              <th>访问入口</th>
+            </tr>
+          </thead>
+          <tbody id="domainTableBody">
+            <tr>
+              <td>1</td>
+              <td class="response-time">120ms</td>
+              <td class="status-available">
+                <i class="fas fa-check-circle"></i> 可用
+              </td>
+              <td>线路1</td>
+              <td>
+                <button class="visit-btn" onclick="window.open('https://go.81v5.com', '_blank')">
+                  <i class="fas fa-external-link-alt"></i> 访问
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td class="response-time">145ms</td>
+              <td class="status-available">
+                <i class="fas fa-check-circle"></i> 可用
+              </td>
+              <td>线路2</td>
+              <td>
+                <button class="visit-btn" onclick="window.open('https://vip.81v5.com', '_blank')">
+                  <i class="fas fa-external-link-alt"></i> 访问
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td class="response-time">168ms</td>
+              <td class="status-available">
+                <i class="fas fa-check-circle"></i> 可用
+              </td>
+              <td>线路3</td>
+              <td>
+                <button class="visit-btn" onclick="window.open('https://ok.81v5.com', '_blank')">
+                  <i class="fas fa-external-link-alt"></i> 访问
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 版权信息 -->
+    <div class="copyright-section">
+      &copy; 2026 域名中心. All rights reserved.
+    </div>
+
+    <!-- 添加至桌面 -->
+  </main>
+
+  <!-- 固定在底部的添加至主屏幕按钮 -->
+  <div class="fixed-add-to-home">
+    <button class="add-to-home-btn" onclick="window.showAddToHomeGuide()" title="添加到主屏幕">
+      <i class="fas fa-plus-circle"></i>
+      <span id="addToHomeText">添加到主屏幕</span>
+    </button>
+  </div>
+
+  <div id="modal-root"></div>
+
+  <script src="/assets/app.js?v=2026020301"></script>
+</body>
+
+</html>

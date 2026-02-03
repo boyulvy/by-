@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .domain-info {
+            background: #f5f7fa;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        
+        .domain-label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .domain-value {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            word-break: break-all;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="header">
+            <div class="logo">🎮</div>
+            <h1 class="title">账户登录</h1>
+        </div>
+        
+        <!-- 加密域名显示 -->
+        <div id="encrypted-domain-display" class="domain-info" style="display:none;">
+            <span class="domain-label">服务域名已加密</span>
+            <span class="domain-value" id="encrypted-value"></span>
+        </div>
+        
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="username">账户名/邮箱</label>
+                <input type="text" id="username" name="username" placeholder="请输入账户名或邮箱" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" placeholder="请输入密码" required>
+            </div>
+            
+            <button type="submit" class="login-btn">登录</button>
+        </form>
+        
+        <div class="footer">
+            <a href="#">注册账户</a>
+            <span>|</span>
+            <a href="#">忘记密码</a>
+        </div>
+    </div>
+    
+    <script>
+        // 检查是否有来自快速登录的加密源信息
+        function initializePage() {
+            const params = new URLSearchParams(window.location.search);
+            const source = params.get('source');
+            const quickLogin = params.get('quickLogin');
+            
+            if (quickLogin === 'true' && source) {
+                try {
+                    // 解码 base64 加密的源信息
+                    const decodedSource = atob(decodeURIComponent(source));
+                    const sourceData = JSON.parse(decodedSource);
+                    
+                    // 显示加密的域名信息
+                    if (sourceData.from === '8yhot.com') {
+                        // 将当前域名进行部分掩盖显示
+                        const currentDomain = window.location.hostname;
+                        const maskedDomain = maskDomain(currentDomain);
+                        
+                        document.getElementById('encrypted-value').textContent = maskedDomain;
+                        document.getElementById('encrypted-domain-display').style.display = 'block';
+                        
+                        console.log('快速登录源信息', sourceData);
+                    }
+                } catch (error) {
+                    console.error('解码源信息失败:', error);
+                }
+            }
+        }
+        
+        // 对域名进行掩盖处理（部分显示）
+        function maskDomain(domain) {
+            if (!domain) return 'unknown';
+            
+            const parts = domain.split('.');
+            if (parts.length < 2) return domain;
+            
+            // 只显示最后一部分（如 .com）和部分第一部分
+            const firstPart = parts[0];
+            const lastPart = parts[parts.length - 1];
+            
+            if (firstPart.length > 2) {
+                // 显示首字母和尾部，中间用 * 代替
+                const masked = firstPart.charAt(0) + '*'.repeat(Math.max(1, firstPart.length - 2)) + firstPart.charAt(firstPart.length - 1);
+                return masked + '...' + lastPart;
+            }
+            
+            return domain;
+        }
+        
+        // 处理登录
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // 这里应该发送到后端进行验证
+            console.log('登录信息:', { username, password });
+            
+            // 示例：模拟登录
+            alert('登录处理中...');
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>

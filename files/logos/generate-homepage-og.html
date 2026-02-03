@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成首页OG图片</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: white;
+            padding: 20px;
+        }
+        
+        #preview {
+            width: 1200px;
+            height: 630px;
+            border: 2px solid #ddd;
+            margin: 20px auto;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .og-content {
+            text-align: center;
+            z-index: 2;
+            background: rgba(0,0,0,0.3);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .og-title {
+            font-size: 72px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .og-subtitle {
+            font-size: 32px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .og-features {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 30px;
+        }
+        
+        .og-feature {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            min-width: 120px;
+        }
+        
+        .og-feature i {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .og-feature-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .og-decorations {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            z-index: 1;
+        }
+        
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+        
+        .circle1 { width: 100px; height: 100px; top: 50px; left: 50px; }
+        .circle2 { width: 150px; height: 150px; top: 400px; right: 80px; }
+        .circle3 { width: 80px; height: 80px; top: 200px; left: 200px; }
+        
+        .controls {
+            text-align: center;
+            margin: 20px;
+        }
+        
+        button {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        
+        button:hover {
+            background: #1e40af;
+        }
+        
+        #downloadLink {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <h2>KeepGet 首页 OG 图片生成器</h2>
+        <button onclick="generateImage()">生成图片</button>
+        <button onclick="downloadImage()">下载图片</button>
+        <a id="downloadLink" download="keepget-homepage-og.png">下载</a>
+    </div>
+    
+    <div id="preview">
+        <div class="og-decorations">
+            <div class="circle circle1"></div>
+            <div class="circle circle2"></div>
+            <div class="circle circle3"></div>
+        </div>
+        
+        <div class="og-content">
+            <div class="og-title">🌐 KeepGet</div>
+            <div class="og-subtitle">热门软件推荐 • 网络工具专家</div>
+            
+            <div class="og-features">
+                <div class="og-feature">
+                    <i class="fas fa-exchange-alt"></i>
+                    <div class="og-feature-text">IP切换</div>
+                </div>
+                <div class="og-feature">
+                    <i class="fas fa-globe"></i>
+                    <div class="og-feature-text">域名验证</div>
+                </div>
+                <div class="og-feature">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <div class="og-feature-text">网站测速</div>
+                </div>
+                <div class="og-feature">
+                    <i class="fas fa-wallet"></i>
+                    <div class="og-feature-text">数字钱包</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateImage() {
+            // 使用html2canvas库需要先加载
+            if (typeof html2canvas === 'undefined') {
+                // 动态加载html2canvas
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                script.onload = function() {
+                    capturePreview();
+                };
+                document.head.appendChild(script);
+            } else {
+                capturePreview();
+            }
+        }
+        
+        function capturePreview() {
+            const preview = document.getElementById('preview');
+            
+            html2canvas(preview, {
+                width: 1200,
+                height: 630,
+                scale: 1,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: null
+            }).then(function(canvas) {
+                // 将canvas转换为图片
+                const imgData = canvas.toDataURL('image/png');
+                
+                // 更新下载链接
+                const downloadLink = document.getElementById('downloadLink');
+                downloadLink.href = imgData;
+                downloadLink.style.display = 'inline';
+                
+                alert('图片生成成功！点击"下载图片"按钮保存。');
+            }).catch(function(error) {
+                console.error('生成图片失败:', error);
+                alert('生成图片失败，请重试。');
+            });
+        }
+        
+        function downloadImage() {
+            const downloadLink = document.getElementById('downloadLink');
+            if (downloadLink.href && downloadLink.href !== '#') {
+                downloadLink.click();
+            } else {
+                alert('请先生成图片！');
+            }
+        }
+        
+        // Canvas 方式作为备选方案
+        function generateWithCanvas() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1200;
+            canvas.height = 630;
+            const ctx = canvas.getContext('2d');
+            
+            // 创建渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, 1200, 630);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1200, 630);
+            
+            // 绘制半透明背景
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.roundRect(300, 150, 600, 330, 20);
+            ctx.fill();
+            
+            // 绘制主标题
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 72px -apple-system, BlinkMacSystemFont, Arial';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+            ctx.fillText('🌐 KeepGet', 600, 250);
+            
+            // 绘制副标题
+            ctx.font = '32px -apple-system, BlinkMacSystemFont, Arial';
+            ctx.fillText('热门软件推荐 • 网络工具专家', 600, 300);
+            
+            // 绘制功能图标（使用文字代替）
+            ctx.font = '18px Arial';
+            ctx.fillText('IP切换    域名验证    网站测速    数字钱包', 600, 380);
+            
+            // 绘制装饰圆圈
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(100, 100, 50, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(1100, 530, 75, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // 下载图片
+            const link = document.createElement('a');
+            link.download = 'keepget-homepage-og-canvas.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // 添加Canvas方式的按钮
+        window.onload = function() {
+            const controls = document.querySelector('.controls');
+            const canvasBtn = document.createElement('button');
+            canvasBtn.textContent = '备选方案(Canvas)';
+            canvasBtn.onclick = generateWithCanvas;
+            controls.appendChild(canvasBtn);
+        };
+    </script>
+</body>
+</html>

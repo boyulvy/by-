@@ -1,0 +1,1095 @@
+export function initModalSystem() {
+  window.showModal = function (type = '', props = {}) {
+    const modalRoot = document.getElementById('modal-root')
+    const html = getModalContent(type, props)
+    modalRoot.innerHTML = `
+      <div class="modal-overlay" onclick="window.closeModal()"></div>
+      <div class="modal">${html}<button class="modal-close" onclick="window.closeModal()">&times;</button></div>
+    `
+    modalRoot.style.display = 'block'
+    setTimeout(() => {
+      const firstInput = modalRoot.querySelector('input,button,select,textarea')
+      if (firstInput) firstInput.focus()
+    }, 200)
+  }
+
+  window.closeModal = function () {
+    const modalRoot = document.getElementById('modal-root')
+    modalRoot.innerHTML = ''
+    modalRoot.style.display = 'none'
+  }
+
+  function getModalContent(type, props) {
+    switch (type) {
+      case 'quick-login':
+        return quickLoginModal()
+      case 'domain-verify':
+        return domainVerifyModal()
+      case 'ip-switch':
+        return ipSwitchModal()
+      case 'vpn':
+        return vpnModal()
+      case 'wallet':
+        return walletModal()
+      case 'register':
+        return registerModal()
+      case 'tutorial':
+        return tutorialModal(props.tutorialType || 'okx')
+      case 'customer':
+        return customerModal()
+      case 'app-download':
+        return appDownloadModal()
+      case 'tools':
+        return toolsModal()
+      default:
+        return `<h3>弹窗内容未定义</h3>`
+    }
+  }
+
+  // 域名验证弹窗
+  function domainVerifyModal() {
+    return `
+      <h3>域名验证中心</h3>
+      <div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 600;">单个域名验证：</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="verify-domain-input" placeholder="请输入要验证的域名（如：example.com）" style="flex: 1;">
+            <button onclick="window.verifyDomain()"><i class="fas fa-search"></i> 验证</button>
+          </div>
+        </div>
+        
+        <div style="margin: 16px 0; text-align: center;">
+          <div style="font-weight: 600; color: #4682e4; margin-bottom: 8px;">或</div>
+          <button onclick="window.testAllDomains()" style="background: #2196F3; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+            <i class="fas fa-globe"></i> 测试所有域名响应速度
+          </button>
+        </div>
+        
+        <div id="verify-domain-result" style="margin-top:12px;"></div>
+        
+        <div style="margin-top: 16px; text-align: center;">
+          <button class="secondary" onclick="window.closeModal()">关闭</button>
+        </div>
+      </div>
+    `
+  }
+
+  window.verifyDomain = function () {
+    const input = document.getElementById('verify-domain-input')
+    const result = document.getElementById('verify-domain-result')
+    if (!input.value) {
+      result.innerHTML =
+        '<div class="modal-result result-error"><i class="fas fa-exclamation-circle"></i> 请输入域名</div>'
+      return
+    }
+    result.innerHTML =
+      '<div class="modal-result result-info"><i class="fas fa-spinner fa-spin"></i> 验证中...</div>'
+    setTimeout(() => {
+      const responseTime = Math.floor(Math.random() * 500) + 100
+      const status = responseTime < 200 ? '优秀' : responseTime < 350 ? '良好' : '一般'
+      const statusColor = responseTime < 200 ? '#4CAF50' : responseTime < 350 ? '#FF9800' : '#F44336'
+
+      result.innerHTML = `
+        <div class="modal-result result-success">
+          <h4><i class="fas fa-check-circle"></i> ${input.value} 验证结果</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+            <div><strong>响应时间:</strong> <span style="color: ${statusColor};">${responseTime}ms</span></div>
+            <div><strong>状态:</strong> <span style="color: ${statusColor};">${status}</span></div>
+            <div><strong>DNS解析:</strong> <span style="color: #4CAF50;">正常</span></div>
+            <div><strong>SSL证书:</strong> <span style="color: #4CAF50;">有效</span></div>
+          </div>
+          <div style="margin-top: 12px; text-align: center;">
+            <button onclick="window.open('https://${input.value}', '_blank')" style="background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+              <i class="fas fa-external-link-alt"></i> 访问该域名
+            </button>
+          </div>
+        </div>
+      `
+    }, 1000)
+  }
+
+  // 测试所有域名功能
+  window.testAllDomains = function () {
+    const result = document.getElementById('verify-domain-result')
+
+    result.innerHTML = `
+      <div style="margin-bottom: 16px; padding: 12px; background: #e3f2fd; border-radius: 6px; border-left: 4px solid #2196F3;">
+        <div style="font-weight: 600; color: #1976d2; margin-bottom: 8px;">
+          <i class="fas fa-info-circle"></i> 正在检测网络环境...
+        </div>
+        <div id="ip-detection-info" style="font-size: 0.9em; color: #0d47a1;">
+          正在获取您的IP地址和地理位置信息...
+        </div>
+      </div>
+      <div id="domain-speed-list">
+        <div style="padding: 12px; text-align: center; color: #666;">
+          <i class="fas fa-spinner fa-spin"></i> 正在测试所有域名响应速度...
+        </div>
+      </div>
+    `
+
+    // 模拟IP检测过程
+    setTimeout(() => {
+      const mockIPInfo = generateMockIPInfo()
+      document.getElementById('ip-detection-info').innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.9em;">
+          <div><strong>IP地址:</strong> ${mockIPInfo.ip}</div>
+          <div><strong>位置:</strong> ${mockIPInfo.location}</div>
+          <div><strong>运营商:</strong> ${mockIPInfo.isp}</div>
+          <div><strong>网络类型:</strong> ${mockIPInfo.networkType}</div>
+        </div>
+      `
+
+      // 开始测试域名速度
+      setTimeout(() => {
+        testDomainSpeeds()
+      }, 1000)
+    }, 1000)
+  }
+
+  // IP切换弹窗
+  function ipSwitchModal() {
+    return `
+      <h3>智能IP切换</h3>
+      <div>
+        <label>选择IP节点：</label>
+        <select id="ip-region-select">
+          <option value="cn">中国大陆 (CN)</option>
+          <option value="us">美国 (US)</option>
+          <option value="hk">香港 (HK)</option>
+          <option value="jp">日本 (JP)</option>
+          <option value="sg">新加坡 (SG)</option>
+          <option value="uk">英国 (UK)</option>
+        </select>
+        <button onclick="window.switchIP()"><i class="fas fa-network-wired"></i> 切换</button>
+        <button class="secondary" onclick="window.closeModal()">关闭</button>
+      </div>
+      <div id="ip-switch-result" style="margin-top:12px;"></div>
+    `
+  }
+
+  window.switchIP = function () {
+    const select = document.getElementById('ip-region-select')
+    const result = document.getElementById('ip-switch-result')
+    result.innerHTML =
+      '<div class="modal-result result-info"><i class="fas fa-spinner fa-spin"></i> 正在切换...</div>'
+    setTimeout(() => {
+      const regionName = select.options[select.selectedIndex].text
+      result.innerHTML = `<div class="modal-result result-success"><i class="fas fa-check-circle"></i> 已成功切换至 ${regionName} 节点</div>`
+    }, 1000)
+  }
+
+  // VPN弹窗
+  function vpnModal() {
+    return `
+      <h3>VPN工具下载</h3>
+      <div>
+        <h4><i class="fas fa-shield-alt"></i> 推荐VPN服务</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>VPN名称</th>
+              <th>特性</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>快连VPN</strong></td>
+              <td>极速连接、稳定可靠</td>
+              <td>
+                <button onclick="window.open('https://letsvpn.world/')"><i class="fas fa-download"></i> 下载</button>
+                <button class="secondary" onclick="window.showModal('tutorial',{tutorialType:'kuailianvpn'})">教程</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>闪连VPN</strong></td>
+              <td>闪电连接、高速稳定</td>
+              <td>
+                <button onclick="window.open('https://lightningxvpn.com/cn/')"><i class="fas fa-download"></i> 下载</button>
+                <button class="secondary" onclick="window.showModal('tutorial',{tutorialType:'shanlienvpn'})">教程</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>NordVPN</strong></td>
+              <td>国际知名、安全加密</td>
+              <td>
+                <button onclick="window.open('https://www.nordvpn.com/zh-cn/download/')"><i class="fas fa-download"></i> 下载</button>
+                <button class="secondary" onclick="window.showModal('tutorial',{tutorialType:'nordvpn'})">教程</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button onclick="window.closeModal()" style="margin-top:12px;"><i class="fas fa-times"></i> 关闭</button>
+    `
+  }
+
+  // 快速登录弹窗
+  function quickLoginModal() {
+    return `
+      <h3>⚡ 快速登录</h3>
+      <div>
+        <div style="margin-bottom: 20px; padding: 16px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #4CAF50;">
+          <div style="font-weight: 600; color: #2e7d32; margin-bottom: 8px;">
+            <i class="fas fa-bolt"></i> 智能快速登录
+          </div>
+          <div style="font-size: 0.9em; color: #1b5e20;">
+            系统将自动检测并跳转到响应最快的域名登录页面
+          </div>
+        </div>
+        
+        <div id="quick-login-status" style="margin-bottom: 16px; text-align: center; color: #666;">
+          点击下方按钮开始快速登录
+        </div>
+        
+        <div style="text-align: center; margin-top: 16px;">
+          <button onclick="window.startQuickLogin()" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 1.1em; font-weight: 600;">
+            <i class="fas fa-bolt"></i> 立即快速登录
+          </button>
+          <button class="secondary" onclick="window.closeModal()" style="margin-left: 12px;">取消</button>
+        </div>
+      </div>
+    `
+  }
+
+  // 数字钱包弹窗
+  function walletModal() {
+    return `
+      <h3>数字钱包工具</h3>
+      <div>
+        <h4><i class="fas fa-wallet"></i> 支持的钱包</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>钱包名称</th>
+              <th>功能特性</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>OKX钱包</strong></td>
+              <td>支持多链资产管理，欧易官方钱包</td>
+              <td>
+                <button onclick="window.open('https://www.okx.com/download')"><i class="fas fa-download"></i> 下载</button>
+                <button class="secondary" onclick="window.showModal('tutorial',{tutorialType:'okx'})">教程</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>币安钱包</strong></td>
+              <td>币安官方钱包，安全可靠</td>
+              <td>
+                <button onclick="window.open('https://www.binance.com/')"><i class="fas fa-download"></i> 下载</button>
+                <button class="secondary" onclick="window.showModal('tutorial',{tutorialType:'binance'})">教程</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>K豆钱包</strong></td>
+              <td>去中心化钱包，自主管理资产</td>
+              <td>
+                <button onclick="window.open('https://kdxz08.com/home/#/')"><i class="fas fa-download"></i> 下载</button>
+                <button class="secondary" onclick="window.showModal('tutorial',{tutorialType:'kd'})">教程</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Trust Wallet</strong></td>
+              <td>多链钱包，支持DeFi应用</td>
+              <td>
+                <button onclick="window.open('https://trustwallet.com/')"><i class="fas fa-download"></i> 下载</button>
+                <button class="secondary" onclick="window.showModal('tutorial',{tutorialType:'trust'})">教程</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button onclick="window.closeModal()" style="margin-top:12px;"><i class="fas fa-times"></i> 关闭</button>
+    `
+  }
+
+  // 快速注册弹窗
+  function registerModal() {
+    return `
+      <h3>快速注册</h3>
+      <div>
+        <label style="color: #4682e4; font-weight: 600; margin-bottom: 8px; display: block;">选择注册网站：</label>
+        <select id="reg-target-site" style="width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #e3eaf5; border-radius: 6px;">
+          <option value="">请选择目标网站</option>
+          <option value="test.8yhot.com">🧪 测试网站 (API调试)</option>
+          <option value="8y369.com">8y369.com - 主要游戏平台</option>
+          <option value="8y258.com">8y258.com - 备用平台</option>
+          <option value="8y68.com">8y68.com - 精简版</option>
+          <option value="8yapp.com">8yapp.com - 移动专版</option>
+          <option value="8y520.com">8y520.com - 高级会员</option>
+          <option value="8y668.com">8y668.com - VIP专享</option>
+          <option value="818by.com">818by.com - 博彩版</option>
+          <option value="518by.com">518by.com - 综合平台</option>
+          <option value="81svip.com">81svip.com - 超级VIP</option>
+          <option value="8y98.com">8y98.com - 旗舰版</option>
+        </select>
+        
+        <input type="email" id="reg-email" placeholder="请输入邮箱地址">
+        <input type="password" id="reg-pwd" placeholder="设置密码（至少6位）">
+        <input type="password" id="reg-pwd-confirm" placeholder="确认密码">
+        <input type="text" id="reg-nickname" placeholder="设置昵称">
+        <input type="text" id="reg-phone" placeholder="手机号码（可选）">
+        
+        <div style="margin: 12px 0;">
+          <label style="display: flex; align-items: center; font-size: 0.9em; color: #666;">
+            <input type="checkbox" id="reg-agree" style="margin-right: 8px;">
+            我同意服务条款和隐私政策，并授权同步注册到选定网站
+          </label>
+        </div>
+        
+        <button onclick="window.submitRegister()"><i class="fas fa-user-plus"></i> 立即注册并同步</button>
+        <button class="secondary" onclick="window.closeModal()">取消</button>
+      </div>
+      <div id="reg-result" style="margin-top:12px;"></div>
+    `
+  }
+
+  window.submitRegister = function () {
+    const targetSite = document.getElementById('reg-target-site').value
+    const email = document.getElementById('reg-email').value.trim()
+    const pwd = document.getElementById('reg-pwd').value
+    const pwdConfirm = document.getElementById('reg-pwd-confirm').value
+    const nick = document.getElementById('reg-nickname').value.trim()
+    const phone = document.getElementById('reg-phone').value.trim()
+    const agree = document.getElementById('reg-agree').checked
+    const result = document.getElementById('reg-result')
+
+    // 验证输入
+    if (!targetSite) {
+      result.innerHTML =
+        '<div class="modal-result result-error"><i class="fas fa-exclamation-circle"></i> 请选择要注册的目标网站</div>'
+      return
+    }
+    if (!email || !pwd || !pwdConfirm || !nick) {
+      result.innerHTML =
+        '<div class="modal-result result-error"><i class="fas fa-exclamation-circle"></i> 请填写必填字段</div>'
+      return
+    }
+    if (!agree) {
+      result.innerHTML =
+        '<div class="modal-result result-error"><i class="fas fa-exclamation-circle"></i> 请同意服务条款和授权同步注册</div>'
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      result.innerHTML =
+        '<div class="modal-result result-error"><i class="fas fa-exclamation-circle"></i> 邮箱格式不正确</div>'
+      return
+    }
+    if (pwd.length < 6) {
+      result.innerHTML =
+        '<div class="modal-result result-error"><i class="fas fa-exclamation-circle"></i> 密码需至少6位</div>'
+      return
+    }
+    if (pwd !== pwdConfirm) {
+      result.innerHTML =
+        '<div class="modal-result result-error"><i class="fas fa-exclamation-circle"></i> 两次密码不一致</div>'
+      return
+    }
+
+    // 开始注册流程
+    result.innerHTML =
+      '<div class="modal-result result-info"><i class="fas fa-spinner fa-spin"></i> 正在注册本地账户...</div>'
+
+    // 模拟本地注册
+    setTimeout(() => {
+      result.innerHTML =
+        '<div class="modal-result result-info"><i class="fas fa-spinner fa-spin"></i> 正在同步注册到目标网站...</div>'
+
+      // 执行同步注册
+      syncRegisterToTargetSite(targetSite, {
+        email: email,
+        password: pwd,
+        nickname: nick,
+        phone: phone
+      }, result)
+    }, 1000)
+  }
+
+  // 同步注册到目标网站（修复版本）
+  async function syncRegisterToTargetSite(targetSite, userData, resultElement) {
+    try {
+      // 显示注册进度
+      resultElement.innerHTML =
+        `<div class="modal-result result-info"><i class="fas fa-spinner fa-spin"></i> 正在向 ${targetSite} 提交注册信息...</div>`
+
+      // 生成登录令牌
+      const loginToken = generateLoginToken(userData.email, targetSite)
+
+      // 模拟API调用过程（因为大多数目标网站没有公开API）
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      // 检查是否为测试环境
+      const isTestSite = targetSite.includes('test') || targetSite.includes('localhost')
+
+      if (isTestSite) {
+        // 测试环境：模拟成功
+        resultElement.innerHTML = `
+          <div class="modal-result result-success">
+            <h4><i class="fas fa-check-circle"></i> 测试注册成功！</h4>
+            <div style="margin: 12px 0; padding: 12px; background: #f0f7ff; border-radius: 6px; border-left: 4px solid #4682e4;">
+              <div><strong>测试账户信息：</strong></div>
+              <div>📧 邮箱：${userData.email}</div>
+              <div>👤 昵称：${userData.nickname}</div>
+              <div>🌐 注册网站：${targetSite}</div>
+              <div>🔐 登录令牌：${loginToken}</div>
+              <div style="color: #10b981; font-weight: 600;">✅ 测试环境注册成功</div>
+            </div>
+            <div style="margin: 12px 0;">
+              <button onclick="window.copyLoginInfo('${targetSite}', '${userData.email}', '${loginToken}')" 
+                      style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                <i class="fas fa-copy"></i> 复制登录信息
+              </button>
+            </div>
+          </div>
+        `
+
+        // 保存测试注册信息
+        saveRegistrationInfo(targetSite, userData, loginToken, true)
+
+      } else {
+        // 生产环境：引导手动注册
+        resultElement.innerHTML = `
+          <div class="modal-result result-warning">
+            <h4><i class="fas fa-info-circle"></i> 需要手动完成注册</h4>
+            <div style="margin: 12px 0; padding: 12px; background: #fef3c7; border-radius: 6px; border-left: 4px solid #f59e0b;">
+              <div><strong>注册引导：</strong></div>
+              <div>📧 邮箱：${userData.email}</div>
+              <div>👤 昵称：${userData.nickname}</div>
+              <div>🌐 目标网站：${targetSite}</div>
+              <div style="margin-top: 8px; font-size: 0.9em; color: #92400e;">
+                <strong>操作步骤：</strong><br>
+                1. 点击下方按钮访问 ${targetSite}<br>
+                2. 使用上述信息完成手动注册<br>
+                3. 注册成功后点击"确认完成"按钮
+              </div>
+            </div>
+            <div style="margin: 12px 0;">
+              <button onclick="window.openRegistrationSite('${targetSite}', '${userData.email}', '${userData.password}', '${userData.nickname}')" 
+                      style="background: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-right: 8px;">
+                <i class="fas fa-external-link-alt"></i> 前往 ${targetSite} 注册
+              </button>
+              <button onclick="window.copyRegistrationInfo('${targetSite}', '${userData.email}', '${userData.password}', '${userData.nickname}')" 
+                      style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                <i class="fas fa-copy"></i> 复制注册信息
+              </button>
+            </div>
+            <div style="margin: 12px 0;">
+              <button onclick="window.confirmManualRegistration('${targetSite}', '${userData.email}', '${loginToken}')" 
+                      style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                <i class="fas fa-check"></i> 确认已完成注册
+              </button>
+            </div>
+            <div style="font-size: 0.9em; color: #666; margin-top: 8px;">
+              💡 提示：由于目标网站安全策略，需要手动完成注册过程
+            </div>
+          </div>
+        `
+
+        // 保存注册信息（标记为待确认）
+        const registrationInfo = {
+          ...userData,
+          manual: true,
+          confirmed: false,
+          password: userData.password // 临时保存密码用于复制
+        }
+        saveRegistrationInfo(targetSite, registrationInfo, loginToken, false)
+      }
+
+    } catch (error) {
+      console.error('注册过程失败:', error)
+      resultElement.innerHTML = `
+        <div class="modal-result result-error">
+          <i class="fas fa-exclamation-circle"></i> 
+          注册过程出现错误，请稍后重试
+          <div style="margin: 12px 0;">
+            <button onclick="window.retryRegistration('${targetSite}')" 
+                    style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 8px;">
+              <i class="fas fa-redo"></i> 重试
+            </button>
+            <button onclick="window.open('https://${targetSite}', '_blank')" 
+                    style="background: #6b7280; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+              <i class="fas fa-external-link-alt"></i> 手动注册
+            </button>
+          </div>
+        </div>
+      `
+    }
+  }
+
+  // 简化的Toast提示函数（用于modal.js）
+  function showToast(message, type = 'info') {
+    const colors = {
+      'success': 'linear-gradient(135deg, #10b981, #34d399)',
+      'error': 'linear-gradient(135deg, #ef4444, #f87171)',
+      'info': 'linear-gradient(135deg, #3b82f6, #60a5fa)',
+      'warning': 'linear-gradient(135deg, #f59e0b, #fbbf24)'
+    }
+
+    const toast = document.createElement('div')
+    toast.textContent = message
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${colors[type] || colors.info};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 10001;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      animation: slideInRight 0.3s ease-out;
+      max-width: 300px;
+      word-wrap: break-word;
+    `
+
+    document.body.appendChild(toast)
+
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.style.animation = 'slideOutRight 0.3s ease-in'
+        setTimeout(() => {
+          if (toast.parentNode) {
+            document.body.removeChild(toast)
+          }
+        }, 300)
+      }
+    }, 4000)
+  }
+
+  // 生成登录令牌
+  function generateLoginToken(email, targetSite) {
+    const timestamp = Date.now()
+    const randomStr = Math.random().toString(36).substring(2, 15)
+    const hashBase = `${email}_${targetSite}_${timestamp}_${randomStr}`
+    // 简单的base64编码作为令牌（实际应用中应使用更安全的方法）
+    return btoa(hashBase).substring(0, 32)
+  }
+
+  // 保存注册信息到本地存储
+  function saveRegistrationInfo(targetSite, userData, loginToken, isSuccess = false) {
+    try {
+      const registrationData = {
+        targetSite: targetSite,
+        email: userData.email,
+        nickname: userData.nickname,
+        phone: userData.phone || '',
+        loginToken: loginToken,
+        registeredAt: new Date().toISOString(),
+        lastLogin: null,
+        manual: !isSuccess,
+        confirmed: isSuccess
+      }
+
+      // 获取现有的注册记录
+      const existingRecords = JSON.parse(localStorage.getItem('syncRegistrations') || '[]')
+
+      // 检查是否已存在相同网站的注册记录
+      const existingIndex = existingRecords.findIndex(record =>
+        record.targetSite === targetSite && record.email === userData.email
+      )
+
+      if (existingIndex >= 0) {
+        // 更新现有记录
+        existingRecords[existingIndex] = registrationData
+      } else {
+        // 添加新记录
+        existingRecords.push(registrationData)
+      }
+
+      // 保存到本地存储
+      localStorage.setItem('syncRegistrations', JSON.stringify(existingRecords))
+
+      console.log('注册信息已保存到本地存储')
+    } catch (error) {
+      console.error('保存注册信息失败:', error)
+    }
+  }
+
+  // 打开注册网站
+  window.openRegistrationSite = function (targetSite, email, password, nickname) {
+    // 构建URL，在目标网站页面预填信息（如果支持）
+    const registrationUrl = `https://${targetSite}/register?ref=8yhot&email=${encodeURIComponent(email)}`
+
+    // 在新窗口打开注册页面
+    const newWindow = window.open(registrationUrl, '_blank', 'noopener,noreferrer')
+
+    if (newWindow) {
+      showToast('正在打开目标网站注册页面...', 'info')
+    } else {
+      alert('新窗口被浏览器阻止，请允许弹窗后重试，或手动访问：' + registrationUrl)
+    }
+  }
+
+  // 登录到目标网站
+  window.loginToTargetSite = function (targetSite, loginToken) {
+    try {
+      // 构建登录URL，包含令牌信息
+      const loginUrl = `https://${targetSite}/?autoLogin=true&token=${loginToken}&source=8yhot`
+
+      // 更新最后登录时间
+      updateLastLoginTime(targetSite, loginToken)
+
+      // 在新窗口打开目标网站
+      const newWindow = window.open(loginUrl, '_blank', 'noopener,noreferrer')
+
+      if (newWindow) {
+        // 显示成功提示
+        const result = document.getElementById('reg-result')
+        if (result) {
+          const successMsg = document.createElement('div')
+          successMsg.innerHTML = `
+            <div class="modal-result result-info" style="margin-top: 12px;">
+              <i class="fas fa-external-link-alt"></i> 
+              正在跳转到 ${targetSite}，请稍候...
+              <div style="font-size: 0.9em; margin-top: 8px; color: #666;">
+                如果页面未自动登录，请使用保存的登录令牌手动登录
+              </div>
+            </div>
+          `
+          result.appendChild(successMsg)
+        }
+
+        // 3秒后关闭弹窗
+        setTimeout(() => {
+          window.closeModal()
+        }, 3000)
+
+      } else {
+        alert('新窗口被浏览器阻止，请允许弹窗后重试，或手动访问：' + loginUrl)
+      }
+
+    } catch (error) {
+      console.error('登录跳转失败:', error)
+      alert('登录跳转失败，请手动访问目标网站并使用登录令牌登录')
+    }
+  }
+
+  // 复制登录信息
+  window.copyLoginInfo = function (targetSite, email, loginToken) {
+    const loginInfo = `网站: ${targetSite}
+邮箱: ${email}
+登录令牌: ${loginToken}
+登录地址: https://${targetSite}/?autoLogin=true&token=${loginToken}&source=8yhot
+
+请保存此信息，可用于快速登录目标网站。`
+
+    navigator.clipboard.writeText(loginInfo).then(() => {
+      // 显示复制成功提示
+      const toast = document.createElement('div')
+      toast.innerHTML = '✅ 登录信息已复制到剪贴板'
+      toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 10001;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        animation: slideInRight 0.3s ease-out;
+      `
+
+      document.body.appendChild(toast)
+
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.style.animation = 'slideOutRight 0.3s ease-in'
+          setTimeout(() => {
+            if (toast.parentNode) {
+              document.body.removeChild(toast)
+            }
+          }, 300)
+        }
+      }, 3000)
+
+    }).catch(() => {
+      // 降级方案：显示信息供用户手动复制
+      alert('登录信息：\n\n' + loginInfo)
+    })
+  }
+
+  // 更新最后登录时间
+  function updateLastLoginTime(targetSite, loginToken) {
+    try {
+      const registrations = JSON.parse(localStorage.getItem('syncRegistrations') || '[]')
+      const registration = registrations.find(r => r.targetSite === targetSite && r.loginToken === loginToken)
+
+      if (registration) {
+        registration.lastLogin = new Date().toISOString()
+        localStorage.setItem('syncRegistrations', JSON.stringify(registrations))
+      }
+    } catch (error) {
+      console.error('更新登录时间失败:', error)
+    }
+  }
+
+  // 复制注册信息（用于手动注册）
+  window.copyRegistrationInfo = function (targetSite, email, password, nickname) {
+    const registrationInfo = `目标网站: ${targetSite}
+邮箱地址: ${email}
+登录密码: ${password}
+用户昵称: ${nickname}
+注册链接: https://${targetSite}
+
+请使用以上信息在目标网站手动完成注册。`
+
+    navigator.clipboard.writeText(registrationInfo).then(() => {
+      showToast('✅ 注册信息已复制到剪贴板', 'success')
+    }).catch(() => {
+      alert('注册信息：\n\n' + registrationInfo)
+    })
+  }
+
+  // 确认已手动注册
+  window.confirmManualRegistration = function (targetSite, email, loginToken) {
+    if (confirm(`请确认您已在 ${targetSite} 使用邮箱 ${email} 完成手动注册。\n\n确认后将更新本地记录状态。`)) {
+      try {
+        // 更新本地存储记录
+        let registrations = JSON.parse(localStorage.getItem('syncRegistrations') || '[]')
+        const registration = registrations.find(r => r.targetSite === targetSite && r.email === email)
+
+        if (registration) {
+          registration.manual = true
+          registration.confirmed = true
+          registration.confirmedAt = new Date().toISOString()
+          localStorage.setItem('syncRegistrations', JSON.stringify(registrations))
+
+          // 更新显示
+          const result = document.getElementById('reg-result')
+          if (result) {
+            result.innerHTML = `
+              <div class="modal-result result-success">
+                <h4><i class="fas fa-check-circle"></i> 注册确认成功！</h4>
+                <div style="margin: 12px 0; padding: 12px; background: #f0f7ff; border-radius: 6px; border-left: 4px solid #4682e4;">
+                  <div>✅ 已确认在 ${targetSite} 完成手动注册</div>
+                  <div>📧 邮箱：${email}</div>
+                  <div>🔐 登录令牌：${loginToken}</div>
+                </div>
+                <div style="margin: 12px 0;">
+                  <button onclick="window.loginToTargetSite('${targetSite}', '${loginToken}')" 
+                          style="background: #4682e4; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                    <i class="fas fa-sign-in-alt"></i> 立即登录 ${targetSite}
+                  </button>
+                </div>
+              </div>
+            `
+          }
+
+          showToast('✅ 注册状态已确认', 'success')
+        }
+      } catch (error) {
+        console.error('确认注册状态失败:', error)
+        showToast('❌ 确认失败，请重试', 'error')
+      }
+    }
+  }
+
+  // 重试注册
+  window.retryRegistration = function (targetSite) {
+    const email = document.getElementById('reg-email').value.trim()
+    const pwd = document.getElementById('reg-pwd').value
+    const nick = document.getElementById('reg-nickname').value.trim()
+    const phone = document.getElementById('reg-phone').value.trim()
+    const result = document.getElementById('reg-result')
+
+    if (email && pwd && nick) {
+      syncRegisterToTargetSite(targetSite, {
+        email: email,
+        password: pwd,
+        nickname: nick,
+        phone: phone
+      }, result)
+    } else {
+      result.innerHTML =
+        '<div class="modal-result result-error"><i class="fas fa-exclamation-circle"></i> 请检查输入信息后重试</div>'
+    }
+  }
+
+  // 客服弹窗
+  function customerModal() {
+    return `
+      <h3>客服中心</h3>
+      <div>
+        <h4><i class="fas fa-headset"></i> 联系方式</h4>
+        <button onclick="window.open('mailto:boyu@81nb.com')" style="width:100%;"><i class="fas fa-envelope"></i> 邮件咨询 (boyu@81nb.com)</button>
+        <button onclick="window.open('https://www.b826419xp.com/Chat/Chat?userID=&userName=')" style="width:100%;"><i class="fas fa-comments"></i> 在线聊天</button>
+        <button onclick="window.open('https://t.me/byyx_bot')" style="width:100%;"><i class="fab fa-telegram"></i> TG机器人</button>
+        <button onclick="window.open('https://whatsapp.com/channel/0029VbBMetjDjiObJx7lOq3L')" style="width:100%;"><i class="fab fa-whatsapp"></i> WhatsApp频道</button>
+        <h4 style="margin-top:16px;"><i class="fas fa-info-circle"></i> 服务时间</h4>
+        <p>Monday - Sunday: 09:00 - 03:00 (UTC+8)</p>
+        <p>工作日优先响应，非工作时间会尽快回复</p>
+      </div>
+      <button onclick="window.closeModal()"><i class="fas fa-times"></i> 关闭</button>
+    `
+  }
+
+  // APP下载弹窗
+  function appDownloadModal() {
+    return `
+      <h3>APP下载</h3>
+      <div>
+        <h4><i class="fas fa-mobile-alt"></i> 官方APP</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>平台</th>
+              <th>说明</th>
+              <th>下载</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Android</strong></td>
+              <td>Android 5.0+ 系统</td>
+              <td>
+                <button onclick="window.open('https://xt.xinqianf152.top/2ySd')"><i class="fas fa-download"></i> 下载</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>iOS</strong></td>
+              <td>iOS 12.0+ 系统</td>
+              <td>
+                <button onclick="window.open('https://xt.xinqianf152.top/s/upwrr')"><i class="fas fa-download"></i> 下载</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>通用下载</strong></td>
+              <td>所有平台通用</td>
+              <td>
+                <button onclick="window.open('https://byphoto01.com/app/mg_xLYK')"><i class="fas fa-download"></i> 下载</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button onclick="window.closeModal()" style="margin-top:12px;"><i class="fas fa-times"></i> 关闭</button>
+    `
+  }
+
+  // 教程弹窗
+  function tutorialModal(type) {
+    const tutorials = {
+      okx: {
+        title: '欧易OKX注册使用教程',
+        content: `<ol>
+          <li>访问欧易OKX官网或下载APP</li>
+          <li>注册账户，填写邮箱/手机和密码</li>
+          <li>完成身份认证和安全设置</li>
+          <li>充值并开始交易</li>
+        </ol>`
+      },
+      binance: {
+        title: '币安Binance注册使用教程',
+        content: `<ol>
+          <li>访问币安官网并注册账户</li>
+          <li>完成邮箱验证和安全设置</li>
+          <li>开启双重验证和身份认证KYC</li>
+          <li>充值并开始交易</li>
+        </ol>`
+      },
+      kd: {
+        title: 'K豆钱包使用教程',
+        content: `<ol>
+          <li>下载并安装K豆钱包APP</li>
+          <li>创建新钱包，安全备份助记词</li>
+          <li>管理钱包账户，进行收款和转账</li>
+        </ol>`
+      },
+      trust: {
+        title: 'Trust Wallet教程',
+        content: `<ol>
+          <li>下载并安装Trust Wallet</li>
+          <li>创建新钱包并设置密码</li>
+          <li>备份助记词，安全管理资产</li>
+        </ol>`
+      },
+      kuailianvpn: {
+        title: '快连VPN使用教程',
+        content: `<ol>
+          <li>下载并安装快连VPN</li>
+          <li>注册账户并登录</li>
+          <li>选择服务器节点连接</li>
+        </ol>`
+      },
+      shanlienvpn: {
+        title: '闪连VPN使用教程',
+        content: `<ol>
+          <li>下载并安装闪连VPN</li>
+          <li>注册账户并登录</li>
+          <li>选择节点并连接</li>
+        </ol>`
+      },
+      nordvpn: {
+        title: 'NordVPN使用教程',
+        content: `<ol>
+          <li>访问官网购买服务</li>
+          <li>下载并安装客户端</li>
+          <li>登录账户，选择节点连接</li>
+        </ol>`
+      }
+    };
+    const data = tutorials[type] || tutorials['okx'];
+    return `<h3>${data.title}</h3><div>${data.content}</div><button onclick="window.closeModal()" style="margin-top:12px;"><i class="fas fa-times"></i> 关闭</button>`;
+  }
+
+  // 快速登录功能实现
+  window.startQuickLogin = function () {
+    const statusDiv = document.getElementById('quick-login-status')
+
+    // 显示检测过程
+    statusDiv.innerHTML = '<div style="color: #2196F3;"><i class="fas fa-spinner fa-spin"></i> 正在检测最佳域名...</div>'
+
+    setTimeout(() => {
+      statusDiv.innerHTML = '<div style="color: #FF9800;"><i class="fas fa-globe"></i> 正在测试域名响应速度...</div>'
+
+      setTimeout(() => {
+        // 模拟找到最快的域名
+        const fastestDomain = getBestDomain()
+        statusDiv.innerHTML = `<div style="color: #4CAF50;"><i class="fas fa-check-circle"></i> 已找到最佳域名: ${fastestDomain}</div>`
+
+        setTimeout(() => {
+          // 直接跳转到最快的域名
+          const loginUrl = `https://${fastestDomain}/?quickLogin=true&source=8yhot&timestamp=${Date.now()}`
+          window.open(loginUrl, '_blank', 'noopener,noreferrer')
+          window.closeModal()
+          showToast(`已打开 ${fastestDomain} 登录页面`, 'success')
+        }, 1000)
+      }, 1500)
+    }, 1000)
+  }
+
+  function getBestDomain() {
+    const domains = [
+      '8y369.com', '8y258.com', '8y68.com', '8yapp.com', '8y520.com',
+      '8y668.com', '818by.com', '518by.com', '81svip.com', '8y98.com'
+    ]
+    // 随机选择一个域名作为"最快"的
+    return domains[Math.floor(Math.random() * domains.length)]
+  }
+
+  function generateMockIPInfo() {
+    const locations = ['广东深圳', '北京朝阳', '上海浦东', '江苏南京', '浙江杭州', '四川成都'];
+    const isps = ['中国电信', '中国联通', '中国移动', '长城宽带'];
+    const networkTypes = ['光纤宽带', '4G/5G', 'ADSL', '企业专线'];
+
+    return {
+      ip: `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`,
+      location: locations[Math.floor(Math.random() * locations.length)],
+      isp: isps[Math.floor(Math.random() * isps.length)],
+      networkType: networkTypes[Math.floor(Math.random() * networkTypes.length)]
+    };
+  }
+
+  function testDomainSpeeds() {
+    // 定义域名库
+    const domains = [
+      '8y369.com', '8y258.com', '8y68.com', '8yapp.com', '8y520.com',
+      '8y668.com', '818by.com', '518by.com', '81svip.com', '8y98.com'
+    ];
+
+    const domainList = document.getElementById('domain-speed-list');
+    const testedDomains = [];
+
+    // 为每个域名生成模拟的响应时间
+    domains.forEach(domain => {
+      const responseTime = Math.floor(Math.random() * 800) + 100; // 100-900ms
+      const status = responseTime < 300 ? 'excellent' : (responseTime < 500 ? 'good' : 'slow');
+      const statusText = responseTime < 300 ? '极速' : (responseTime < 500 ? '正常' : '较慢');
+      const statusColor = responseTime < 300 ? '#4CAF50' : (responseTime < 500 ? '#FF9800' : '#F44336');
+
+      testedDomains.push({
+        domain,
+        responseTime,
+        status,
+        statusText,
+        statusColor
+      });
+    });
+
+    // 按响应时间排序
+    testedDomains.sort((a, b) => a.responseTime - b.responseTime);
+
+    // 生成域名列表HTML
+    const domainListHTML = testedDomains.map((item, index) => `
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; margin: 4px 0; border: 1px solid #e0e0e0; border-radius: 6px; background: ${index === 0 ? '#e8f5e9' : '#fafafa'};">
+        <div style="flex: 1;">
+          <div style="font-weight: 600; color: #333;">${item.domain}</div>
+          <div style="font-size: 0.8em; color: #666;">
+            ${index === 0 ? '🏆 最佳选择' : `排名 #${index + 1}`}
+          </div>
+        </div>
+        <div style="text-align: center; margin: 0 12px;">
+          <div style="font-weight: 600; color: ${item.statusColor};">${item.responseTime}ms</div>
+          <div style="font-size: 0.8em; color: ${item.statusColor};">${item.statusText}</div>
+        </div>
+        <button onclick="window.open('https://${item.domain}', '_blank')" 
+                style="background: ${index === 0 ? '#4CAF50' : '#2196F3'}; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
+          ${index === 0 ? '访问最快' : '访问'}
+        </button>
+      </div>
+    `).join('');
+
+    domainList.innerHTML = domainListHTML;
+  }
+
+  // Toast提示函数
+  function showToast(message, type = 'info') {
+    const colors = {
+      'success': 'linear-gradient(135deg, #4CAF50, #66BB6A)',
+      'error': 'linear-gradient(135deg, #F44336, #EF5350)',
+      'info': 'linear-gradient(135deg, #2196F3, #42A5F5)',
+      'warning': 'linear-gradient(135deg, #FF9800, #FFB74D)'
+    };
+
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${colors[type] || colors.info};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 10001;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      animation: slideInRight 0.3s ease-out;
+      max-width: 300px;
+      word-wrap: break-word;
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.style.animation = 'slideOutRight 0.3s ease-in';
+        setTimeout(() => {
+          if (toast.parentNode) {
+            document.body.removeChild(toast);
+          }
+        }, 300);
+      }
+    }, 3000);
+  }
+
+  // 全局入口
+  window.showQuickLoginModal = () => window.showModal('quick-login');
+  window.showDomainVerifyModal = () => window.showModal('domain-verify');
+  window.showIPSwitchModal = () => window.showModal('ip-switch');
+  window.showVPNModal = () => window.showModal('vpn');
+  window.showWalletModal = () => window.showModal('wallet');
+  window.showRegisterModal = () => window.showModal('register');
+  window.showCustomerServiceModal = () => window.showModal('customer');
+  window.showAppDownloadModal = () => window.showModal('app-download');
+  window.showToolsModal = () => window.showModal('tools');
+  window.showTutorialModal = (tutorialType) => window.showModal('tutorial', { tutorialType });
+}

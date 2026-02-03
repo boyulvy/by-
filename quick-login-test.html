@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速登录测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            background: #f9f9f9;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        .code {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px 5px 10px 0;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        .result {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #2196F3;
+        }
+        .error {
+            background: #ffebee;
+            border-left-color: #337ef7;
+            color: #314dff;
+        }
+        .success {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+            color: #2e7d32;
+        }
+        #output {
+            margin-top: 15px;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 快速登录功能测试</h1>
+        
+        <div class="test-section">
+            <h3>1. 测试域名列表 API</h3>
+            <p>获取 /api/domains-list 并验证返回数据</p>
+            <button onclick="testDomainsAPI()">测试 API</button>
+            <div id="api-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. 测试域名掩盖函数</h3>
+            <p>测试域名显示掩盖逻辑</p>
+            <button onclick="testMaskDomain()">测试掩盖</button>
+            <div id="mask-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. 测试 Base64 编码</h3>
+            <p>测试源信息的编码和解码</p>
+            <button onclick="testEncoding()">测试编码</button>
+            <div id="encode-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. 模拟快速登录跳转</h3>
+            <p>生成完整的跳转 URL</p>
+            <button onclick="generateLoginURL()">生成 URL</button>
+            <div id="url-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>5. 检查当前 URL 参数</h3>
+            <p>如果从快速登录跳转过来，显示解码后的信息</p>
+            <button onclick="checkCurrentURL()">检查参数</button>
+            <div id="url-check-result"></div>
+        </div>
+    </div>
+
+    <script>
+        function formatJSON(obj) {
+            return JSON.stringify(obj, null, 2);
+        }
+
+        function showResult(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="result ${isError ? 'error' : 'success'}">${message}</div>`;
+        }
+
+        function showCode(elementId, code) {
+            const element = document.getElementById(elementId);
+            element.innerHTML += `<div class="code">${code}</div>`;
+        }
+
+        // 1. 测试 API
+        async function testDomainsAPI() {
+            try {
+                const response = await fetch('/api/domains-list');
+                const data = await response.json();
+                
+                let html = `<div class="result success">
+                    <strong>✓ API 响应成功</strong><br>
+                    域名总数: ${data.domains.length}<br>
+                    前 5 个域名: ${data.domains.slice(0, 5).join(', ')}
+                </div>`;
+                html += `<pre>${formatJSON(data)}</pre>`;
+                
+                document.getElementById('api-result').innerHTML = html;
+            } catch (error) {
+                showResult('api-result', `✗ API 请求失败: ${error.message}`, true);
+            }
+        }
+
+        // 2. 测试掩盖函数
+        function maskDomain(domain) {
+            const parts = domain.split('.');
+            if (parts.length < 2) return domain;
+            
+            const firstPart = parts[0];
+            const lastPart = parts[parts.length - 1];
+            
+            if (firstPart.length > 2) {
+                const masked = firstPart.charAt(0) + '*'.repeat(Math.max(1, firstPart.length - 2)) + firstPart.charAt(firstPart.length - 1);
+                return masked + '...' + lastPart;
+            }
+            
+            return domain;
+        }
+
+        function testMaskDomain() {
+            const testDomains = [
+                '8y258.com',
+                '81yx.vip',
+                'www.8y98.com',
+                'game.8y98.com',
+                'dl.518by.com'
+            ];
+            
+            let html = '<div class="result success"><strong>✓ 掩盖结果:</strong><br>';
+            testDomains.forEach(domain => {
+                const masked = maskDomain(domain);
+                html += `${domain} → <strong>${masked}</strong><br>`;
+            });
+            html += '</div>';
+            
+            document.getElementById('mask-result').innerHTML = html;
+        }
+
+        // 3. 测试编码
+        function testEncoding() {
+            const sourceData = {
+                from: '8yhot.com',
+                timestamp: Date.now(),
+                type: 'quick-login'
+            };
+            
+            const encoded = btoa(JSON.stringify(sourceData));
+            const urlEncoded = encodeURIComponent(encoded);
+            const decoded = JSON.parse(atob(decodeURIComponent(urlEncoded)));
+            
+            let html = `<div class="result success"><strong>✓ 编码/解码成功</strong></div>`;
+            html += `<strong>原始数据:</strong>`;
+            html += `<pre>${formatJSON(sourceData)}</pre>`;
+            html += `<strong>Base64 编码:</strong>`;
+            html += `<pre>${encoded}</pre>`;
+            html += `<strong>URL 编码:</strong>`;
+            html += `<pre>${urlEncoded}</pre>`;
+            html += `<strong>解码后的数据:</strong>`;
+            html += `<pre>${formatJSON(decoded)}</pre>`;
+            
+            document.getElementById('encode-result').innerHTML = html;
+        }
+
+        // 4. 生成登录 URL
+        async function generateLoginURL() {
+            try {
+                const response = await fetch('/api/domains-list');
+                const data = await response.json();
+                
+                if (!data.domains || data.domains.length === 0) {
+                    showResult('url-result', '✗ 域名列表为空', true);
+                    return;
+                }
+                
+                const selectedDomain = data.domains[Math.floor(Math.random() * data.domains.length)];
+                const sourceData = {
+                    from: '8yhot.com',
+                    timestamp: Date.now(),
+                    type: 'quick-login'
+                };
+                
+                const encoded = btoa(JSON.stringify(sourceData));
+                const loginUrl = `https://${selectedDomain}/?quickLogin=true&source=${encodeURIComponent(encoded)}`;
+                
+                let html = `<div class="result success">
+                    <strong>✓ 生成成功</strong><br>
+                    <strong>选中的域名:</strong> ${selectedDomain}<br>
+                </div>`;
+                html += `<strong>完整 URL:</strong>`;
+                html += `<pre>${loginUrl}</pre>`;
+                html += `<button onclick="window.open('${loginUrl}', '_blank')">打开链接</button>`;
+                
+                document.getElementById('url-result').innerHTML = html;
+            } catch (error) {
+                showResult('url-result', `✗ 生成失败: ${error.message}`, true);
+            }
+        }
+
+        // 5. 检查当前 URL
+        function checkCurrentURL() {
+            const params = new URLSearchParams(window.location.search);
+            const quickLogin = params.get('quickLogin');
+            const source = params.get('source');
+            
+            if (!quickLogin || !source) {
+                showResult('url-check-result', '当前页面没有快速登录参数', false);
+                return;
+            }
+            
+            try {
+                const decodedSource = atob(decodeURIComponent(source));
+                const sourceData = JSON.parse(decodedSource);
+                
+                let html = `<div class="result success">
+                    <strong>✓ 检测到快速登录跳转</strong><br>
+                    <strong>来源:</strong> ${sourceData.from}<br>
+                    <strong>时间戳:</strong> ${sourceData.timestamp}<br>
+                    <strong>类型:</strong> ${sourceData.type}<br>
+                    <strong>当前域名:</strong> ${window.location.hostname}<br>
+                    <strong>掩盖显示:</strong> ${maskDomain(window.location.hostname)}
+                </div>`;
+                html += `<strong>解码后的完整数据:</strong>`;
+                html += `<pre>${formatJSON(sourceData)}</pre>`;
+                
+                document.getElementById('url-check-result').innerHTML = html;
+            } catch (error) {
+                showResult('url-check-result', `✗ 解码失败: ${error.message}`, true);
+            }
+        }
+
+        // 页面加载时自动检查
+        document.addEventListener('DOMContentLoaded', checkCurrentURL);
+    </script>
+</body>
+</html>

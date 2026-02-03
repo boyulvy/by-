@@ -1,0 +1,61 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.5)"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg-gradient)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="50" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+  <circle cx="1100" cy="530" r="75" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+  <circle cx="200" cy="200" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+  
+  <!-- Main content background -->
+  <rect x="300" y="150" width="600" height="330" rx="20" fill="rgba(0,0,0,0.3)"/>
+  
+  <!-- Main title -->
+  <text x="600" y="250" font-family="Arial, sans-serif" font-size="72" font-weight="bold" 
+        text-anchor="middle" fill="white" filter="url(#shadow)">🌐 KeepGet</text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="300" font-family="Arial, sans-serif" font-size="32" 
+        text-anchor="middle" fill="white" opacity="0.9">热门软件推荐 • 网络工具专家</text>
+  
+  <!-- Feature cards background -->
+  <rect x="350" y="350" width="120" height="80" rx="10" fill="rgba(255,255,255,0.1)"/>
+  <rect x="490" y="350" width="120" height="80" rx="10" fill="rgba(255,255,255,0.1)"/>
+  <rect x="630" y="350" width="120" height="80" rx="10" fill="rgba(255,255,255,0.1)"/>
+  <rect x="770" y="350" width="120" height="80" rx="10" fill="rgba(255,255,255,0.1)"/>
+  
+  <!-- Feature icons (using text) -->
+  <text x="410" y="375" font-family="Arial, sans-serif" font-size="20" 
+        text-anchor="middle" fill="white">🔧</text>
+  <text x="410" y="395" font-family="Arial, sans-serif" font-size="16" 
+        text-anchor="middle" fill="white">IP切换</text>
+  
+  <text x="550" y="375" font-family="Arial, sans-serif" font-size="20" 
+        text-anchor="middle" fill="white">🌐</text>
+  <text x="550" y="395" font-family="Arial, sans-serif" font-size="16" 
+        text-anchor="middle" fill="white">域名验证</text>
+  
+  <text x="690" y="375" font-family="Arial, sans-serif" font-size="20" 
+        text-anchor="middle" fill="white">⚡</text>
+  <text x="690" y="395" font-family="Arial, sans-serif" font-size="16" 
+        text-anchor="middle" fill="white">网站测速</text>
+  
+  <text x="830" y="375" font-family="Arial, sans-serif" font-size="20" 
+        text-anchor="middle" fill="white">💰</text>
+  <text x="830" y="395" font-family="Arial, sans-serif" font-size="16" 
+        text-anchor="middle" fill="white">数字钱包</text>
+  
+  <!-- Bottom text -->
+  <text x="600" y="500" font-family="Arial, sans-serif" font-size="20" 
+        text-anchor="middle" fill="rgba(255,255,255,0.8)">专业网络工具服务平台 - keepget.com</text>
+</svg>

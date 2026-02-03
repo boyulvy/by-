@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        .og-card {
+            width: 1200px;
+            height: 630px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .og-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+        }
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+        .title {
+            font-size: 72px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .subtitle {
+            font-size: 32px;
+            color: #93c5fd;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+        .features {
+            font-size: 24px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        .decoration {
+            position: absolute;
+            width: 200px;
+            height: 30px;
+            background: rgba(59, 130, 246, 0.6);
+            border-radius: 15px;
+        }
+        .decoration:nth-child(1) { top: 50px; left: 100px; }
+        .decoration:nth-child(2) { top: 50px; right: 100px; }
+        .decoration:nth-child(3) { bottom: 50px; left: 50%; transform: translateX(-50%); }
+    </style>
+</head>
+<body>
+    <div class="og-card">
+        <div class="decoration"></div>
+        <div class="decoration"></div>
+        <div class="decoration"></div>
+        <div class="content">
+            <div class="title">KeepGet</div>
+            <div class="subtitle">热门软件推荐平台</div>
+            <div class="features">
+                域名验证 • IP切换工具 • 网站测速<br>
+                数字钱包 • VPN工具 • 一站式服务
+            </div>
+        </div>
+    </div>
+</body>
+</html>
